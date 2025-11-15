@@ -1,21 +1,30 @@
 """
 Hugging Face Model Service
 Provides easy access to downloaded Hugging Face models
+Supports offline mode after models are downloaded
 """
 
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 import json
+import os
 
 
 class HuggingFaceService:
     """Service for using pre-trained Hugging Face models"""
 
-    def __init__(self, models_dir='models'):
+    def __init__(self, models_dir='models', offline_mode=True):
         self.models_dir = Path(models_dir)
         self.cache_dir = self.models_dir / 'transformers_cache'
         self.manifest_file = self.models_dir / 'manifest.json'
         self.pipelines = {}
+        self.offline_mode = offline_mode or os.getenv('OFFLINE_MODE', 'true').lower() == 'true'
+
+        # Set HuggingFace offline environment variables if in offline mode
+        if self.offline_mode:
+            os.environ['HF_DATASETS_OFFLINE'] = '1'
+            os.environ['TRANSFORMERS_OFFLINE'] = '1'
+
         self._load_manifest()
 
     def _load_manifest(self):
@@ -48,11 +57,17 @@ class HuggingFaceService:
             model_name = model_info['model_name']
             task = model_info['task']
 
-            pipe = pipeline(
-                task,
-                model=model_name,
-                cache_dir=str(self.cache_dir)
-            )
+            # Configure pipeline for offline mode
+            pipeline_kwargs = {
+                'model': model_name,
+                'cache_dir': str(self.cache_dir)
+            }
+
+            # In offline mode, only use locally cached models
+            if self.offline_mode:
+                pipeline_kwargs['local_files_only'] = True
+
+            pipe = pipeline(task, **pipeline_kwargs)
 
             # Cache the pipeline
             self.pipelines[model_key] = pipe
@@ -60,6 +75,13 @@ class HuggingFaceService:
 
         except ImportError:
             raise Exception("transformers library not installed")
+        except OSError as e:
+            if self.offline_mode and "offline mode" in str(e).lower():
+                raise Exception(
+                    f"Model '{model_key}' not found locally. "
+                    f"Please run 'python setup_offline.py' to download models first."
+                )
+            raise Exception(f"Failed to load model '{model_key}': {e}")
         except Exception as e:
             raise Exception(f"Failed to load model '{model_key}': {e}")
 

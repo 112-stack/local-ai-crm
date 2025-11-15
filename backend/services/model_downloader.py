@@ -266,6 +266,13 @@ class ModelDownloader:
             model_name: Direct model name from Hugging Face (e.g., 'bert-base-uncased')
         """
         try:
+            # Temporarily disable offline mode for downloading
+            import os
+            offline_backup = os.environ.get('HF_DATASETS_OFFLINE')
+            transformers_offline_backup = os.environ.get('TRANSFORMERS_OFFLINE')
+            os.environ.pop('HF_DATASETS_OFFLINE', None)
+            os.environ.pop('TRANSFORMERS_OFFLINE', None)
+
             from transformers import (
                 AutoModel,
                 AutoTokenizer,
@@ -329,6 +336,13 @@ class ModelDownloader:
             self._save_manifest()
 
             print(f"✓ Model downloaded and cached: {model_name}\n")
+
+            # Restore offline mode settings
+            if offline_backup:
+                os.environ['HF_DATASETS_OFFLINE'] = offline_backup
+            if transformers_offline_backup:
+                os.environ['TRANSFORMERS_OFFLINE'] = transformers_offline_backup
+
             return True
 
         except ImportError:
@@ -337,6 +351,13 @@ class ModelDownloader:
             return False
         except Exception as e:
             print(f"✗ Failed to download model: {e}")
+
+            # Restore offline mode settings even on error
+            if offline_backup:
+                os.environ['HF_DATASETS_OFFLINE'] = offline_backup
+            if transformers_offline_backup:
+                os.environ['TRANSFORMERS_OFFLINE'] = transformers_offline_backup
+
             return False
 
     def download_all_huggingface_models(self, include_large=False):

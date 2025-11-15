@@ -21,6 +21,7 @@ except Exception as e:
 
 # Import services
 from services.predictor import PredictorService
+from services.enhanced_predictor import EnhancedPredictorService
 from services.risk_analyzer import RiskAnalyzer
 from services.file_processor import FileProcessor
 from services.config_manager import ConfigManager
@@ -44,7 +45,17 @@ app.add_middleware(
 
 # Initialize services
 config_manager = ConfigManager()
-predictor_service = PredictorService(config_manager)
+
+# Try to use enhanced predictor with transformers, fallback to basic predictor
+try:
+    import torch
+    predictor_service = EnhancedPredictorService(config_manager)
+    print("✓ Using Enhanced Predictor with Transformer Models")
+except Exception as e:
+    print(f"⚠ Enhanced predictor unavailable, using basic predictor: {e}")
+    predictor_service = PredictorService(config_manager)
+    print("✓ Using Basic Predictor")
+
 risk_analyzer = RiskAnalyzer()
 file_processor = FileProcessor()
 auto_runner = get_auto_runner()

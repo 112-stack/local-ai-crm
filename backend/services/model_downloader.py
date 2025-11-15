@@ -14,55 +14,156 @@ from datetime import datetime
 class ModelDownloader:
     """Handles downloading and caching of AI models for local use"""
 
-    # Curated list of pre-trained Hugging Face models
+    # Curated list of pre-trained Hugging Face models optimized for RTX 4090
     HUGGINGFACE_MODELS = {
+        # === CORE BUSINESS MODELS (Recommended for offline use) ===
         'sentiment': {
             'name': 'distilbert-base-uncased-finetuned-sst-2-english',
             'description': 'Sentiment analysis (positive/negative)',
             'task': 'text-classification',
-            'size': '~250MB'
+            'size': '~250MB',
+            'url': 'https://huggingface.co/distilbert-base-uncased-finetuned-sst-2-english',
+            'priority': 'high'
         },
         'emotion': {
             'name': 'j-hartmann/emotion-english-distilroberta-base',
             'description': 'Emotion detection (joy, sadness, anger, fear, etc.)',
             'task': 'text-classification',
-            'size': '~310MB'
+            'size': '~310MB',
+            'url': 'https://huggingface.co/j-hartmann/emotion-english-distilroberta-base',
+            'priority': 'high'
         },
         'ner': {
             'name': 'dslim/bert-base-NER',
             'description': 'Named Entity Recognition (person, organization, location)',
             'task': 'token-classification',
-            'size': '~420MB'
+            'size': '~420MB',
+            'url': 'https://huggingface.co/dslim/bert-base-NER',
+            'priority': 'high'
         },
+        'financial-sentiment': {
+            'name': 'ProsusAI/finbert',
+            'description': 'Financial sentiment analysis (bullish/bearish)',
+            'task': 'text-classification',
+            'size': '~440MB',
+            'url': 'https://huggingface.co/ProsusAI/finbert',
+            'priority': 'high'
+        },
+
+        # === ADVANCED FINANCIAL & BUSINESS MODELS ===
+        'financial-phrase': {
+            'name': 'yiyanghkust/finbert-tone',
+            'description': 'Financial phrase tone analysis (positive/negative/neutral)',
+            'task': 'text-classification',
+            'size': '~440MB',
+            'url': 'https://huggingface.co/yiyanghkust/finbert-tone',
+            'priority': 'high'
+        },
+        'esg-analysis': {
+            'name': 'ESGBERT/EnvironmentalBERT-environmental',
+            'description': 'ESG (Environmental, Social, Governance) analysis',
+            'task': 'text-classification',
+            'size': '~440MB',
+            'url': 'https://huggingface.co/ESGBERT/EnvironmentalBERT-environmental',
+            'priority': 'medium'
+        },
+
+        # === SENTENCE EMBEDDINGS (GPU Optimized) ===
+        'sentence-transformer': {
+            'name': 'sentence-transformers/all-mpnet-base-v2',
+            'description': 'Best sentence embeddings for semantic similarity',
+            'task': 'feature-extraction',
+            'size': '~420MB',
+            'url': 'https://huggingface.co/sentence-transformers/all-mpnet-base-v2',
+            'priority': 'high'
+        },
+        'sentence-transformer-mini': {
+            'name': 'sentence-transformers/all-MiniLM-L6-v2',
+            'description': 'Fast sentence embeddings (5x faster)',
+            'task': 'feature-extraction',
+            'size': '~80MB',
+            'url': 'https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2',
+            'priority': 'high'
+        },
+
+        # === POWERFUL CLASSIFICATION MODELS (RTX 4090 Optimized) ===
+        'roberta-large': {
+            'name': 'roberta-large',
+            'description': 'Large RoBERTa for high-accuracy classification',
+            'task': 'fill-mask',
+            'size': '~1.4GB',
+            'url': 'https://huggingface.co/roberta-large',
+            'priority': 'medium'
+        },
+        'deberta-large': {
+            'name': 'microsoft/deberta-v3-large',
+            'description': 'State-of-the-art DeBERTa for classification',
+            'task': 'fill-mask',
+            'size': '~1.5GB',
+            'url': 'https://huggingface.co/microsoft/deberta-v3-large',
+            'priority': 'medium'
+        },
+
+        # === ZERO-SHOT & MULTI-PURPOSE ===
+        'zero-shot': {
+            'name': 'facebook/bart-large-mnli',
+            'description': 'Zero-shot classification (no training needed)',
+            'task': 'zero-shot-classification',
+            'size': '~1.6GB',
+            'url': 'https://huggingface.co/facebook/bart-large-mnli',
+            'priority': 'high'
+        },
+        'zero-shot-deberta': {
+            'name': 'MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli',
+            'description': 'Advanced zero-shot classification',
+            'task': 'zero-shot-classification',
+            'size': '~1.5GB',
+            'url': 'https://huggingface.co/MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli',
+            'priority': 'medium'
+        },
+
+        # === TEXT GENERATION & QA ===
         'qa': {
             'name': 'distilbert-base-cased-distilled-squad',
-            'description': 'Question Answering',
+            'description': 'Question Answering from context',
             'task': 'question-answering',
-            'size': '~260MB'
+            'size': '~260MB',
+            'url': 'https://huggingface.co/distilbert-base-cased-distilled-squad',
+            'priority': 'medium'
         },
         'summarization': {
             'name': 'facebook/bart-large-cnn',
             'description': 'Text summarization',
             'task': 'summarization',
-            'size': '~1.6GB'
-        },
-        'zero-shot': {
-            'name': 'facebook/bart-large-mnli',
-            'description': 'Zero-shot classification',
-            'task': 'zero-shot-classification',
-            'size': '~1.6GB'
+            'size': '~1.6GB',
+            'url': 'https://huggingface.co/facebook/bart-large-cnn',
+            'priority': 'low'
         },
         'text-generation': {
             'name': 'distilgpt2',
             'description': 'Text generation (GPT-2 small)',
             'task': 'text-generation',
-            'size': '~350MB'
+            'size': '~350MB',
+            'url': 'https://huggingface.co/distilgpt2',
+            'priority': 'low'
         },
-        'financial-sentiment': {
-            'name': 'ProsusAI/finbert',
-            'description': 'Financial sentiment analysis',
-            'task': 'text-classification',
-            'size': '~440MB'
+
+        # === LIGHTWEIGHT LLM (fits in 4090) ===
+        'llm-7b': {
+            'name': 'microsoft/phi-2',
+            'description': 'Phi-2 2.7B parameter LLM (fits in 24GB GPU)',
+            'task': 'text-generation',
+            'size': '~5.5GB',
+            'url': 'https://huggingface.co/microsoft/phi-2',
+            'priority': 'medium'
+        },
+        'mistral-7b-instruct': {
+            'name': 'mistralai/Mistral-7B-Instruct-v0.2',
+            'description': 'Mistral 7B Instruct (requires 16GB+ VRAM)',
+            'task': 'text-generation',
+            'size': '~14GB',
+            'url': 'https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2',
+            'priority': 'low'
         }
     }
 
@@ -282,20 +383,68 @@ class ModelDownloader:
 
         return success_count, skip_count, fail_count
 
-    def download_recommended_models(self):
-        """Download a recommended subset of models for business use"""
+    def download_recommended_models(self, profile='standard'):
+        """
+        Download a recommended subset of models for business use
+
+        Args:
+            profile: 'minimal', 'standard', 'full', or 'gpu-optimized'
+        """
         print("\n" + "=" * 70)
-        print("📦 Downloading Recommended Models for Business Applications")
+        print(f"📦 Downloading Recommended Models - {profile.upper()} Profile")
         print("=" * 70)
 
-        recommended = ['sentiment', 'emotion', 'ner', 'financial-sentiment']
+        profiles = {
+            'minimal': [
+                'sentiment', 'financial-sentiment', 'sentence-transformer-mini'
+            ],
+            'standard': [
+                'sentiment', 'emotion', 'ner', 'financial-sentiment',
+                'financial-phrase', 'sentence-transformer', 'zero-shot'
+            ],
+            'full': [
+                'sentiment', 'emotion', 'ner', 'financial-sentiment',
+                'financial-phrase', 'sentence-transformer', 'zero-shot',
+                'roberta-large', 'qa', 'esg-analysis'
+            ],
+            'gpu-optimized': [
+                'sentiment', 'emotion', 'ner', 'financial-sentiment',
+                'financial-phrase', 'sentence-transformer', 'zero-shot',
+                'zero-shot-deberta', 'deberta-large', 'llm-7b'
+            ]
+        }
 
-        success_count = 0
+        recommended = profiles.get(profile, profiles['standard'])
+
+        print(f"\n📋 Models to download ({len(recommended)}):")
+        total_size = 0
         for key in recommended:
+            model_info = self.HUGGINGFACE_MODELS.get(key, {})
+            print(f"  • {key}: {model_info.get('description', 'N/A')} ({model_info.get('size', 'Unknown')})")
+
+        print("\n⏳ Starting downloads...")
+        success_count = 0
+        failed = []
+
+        for key in recommended:
+            # Check if already downloaded
+            manifest_key = f'hf_{key}'
+            if manifest_key in self.manifest and self.manifest[manifest_key].get('status') == 'downloaded':
+                print(f"\n✓ {key} - Already downloaded")
+                success_count += 1
+                continue
+
             if self.download_huggingface_model(model_key=key):
                 success_count += 1
+            else:
+                failed.append(key)
 
-        print(f"\n✓ Downloaded {success_count}/{len(recommended)} recommended models")
+        print("\n" + "=" * 70)
+        print(f"✓ Downloaded {success_count}/{len(recommended)} models")
+        if failed:
+            print(f"⚠ Failed: {', '.join(failed)}")
+        print("=" * 70)
+
         return success_count == len(recommended)
 
     def check_model_availability(self, model_name):

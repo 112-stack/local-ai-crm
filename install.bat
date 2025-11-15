@@ -63,15 +63,43 @@ call venv\Scripts\activate.bat
 REM Install backend dependencies
 echo Installing backend dependencies...
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+if %ERRORLEVEL% NEQ 0 (
+    echo Failed to upgrade pip
+    exit /b 1
+)
 
-REM Install PyTorch
+REM Install PyTorch first (before other dependencies)
 if "%GPU_AVAILABLE%"=="true" (
     echo Installing PyTorch with CUDA support...
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    if %ERRORLEVEL% NEQ 0 (
+        echo Failed to install PyTorch with CUDA. Falling back to CPU version...
+        pip install torch torchvision torchaudio
+    )
 ) else (
     echo Installing PyTorch CPU version...
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+    pip install torch torchvision torchaudio
+)
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Failed to install PyTorch
+    exit /b 1
+)
+
+REM Install numpy (using pre-built wheel)
+echo Installing NumPy...
+pip install numpy
+if %ERRORLEVEL% NEQ 0 (
+    echo Failed to install NumPy
+    exit /b 1
+)
+
+REM Install remaining dependencies
+echo Installing remaining dependencies...
+pip install -r requirements.txt
+if %ERRORLEVEL% NEQ 0 (
+    echo Failed to install backend dependencies
+    exit /b 1
 )
 
 REM Create .env file

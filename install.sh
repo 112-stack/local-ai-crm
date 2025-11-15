@@ -72,17 +72,42 @@ source venv/bin/activate
 # Install backend dependencies
 echo -e "${YELLOW}Installing backend dependencies...${NC}"
 pip install --upgrade pip
-pip install -r requirements.txt
-
-# Install PyTorch with CUDA support if GPU is available
-if [ "$GPU_AVAILABLE" = true ]; then
-    echo -e "${YELLOW}Installing PyTorch with CUDA support...${NC}"
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-else
-    echo -e "${YELLOW}Installing PyTorch (CPU version)...${NC}"
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to upgrade pip${NC}"
+    exit 1
 fi
 
+# Install PyTorch first (before other dependencies)
+if [ "$GPU_AVAILABLE" = true ]; then
+    echo -e "${YELLOW}Installing PyTorch with CUDA support...${NC}"
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    if [ $? -ne 0 ]; then
+        echo -e "${YELLOW}Failed to install PyTorch with CUDA. Falling back to CPU version...${NC}"
+        pip install torch torchvision torchaudio
+    fi
+else
+    echo -e "${YELLOW}Installing PyTorch (CPU version)...${NC}"
+    pip install torch torchvision torchaudio
+fi
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to install PyTorch${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ PyTorch installed${NC}"
+
+# Install numpy (using pre-built wheel)
+echo -e "${YELLOW}Installing NumPy...${NC}"
+pip install numpy
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to install NumPy${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ NumPy installed${NC}"
+
+# Install remaining dependencies
+echo -e "${YELLOW}Installing remaining dependencies...${NC}"
+pip install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo -e "${RED}Failed to install backend dependencies${NC}"
     exit 1

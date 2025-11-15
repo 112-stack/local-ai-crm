@@ -1,25 +1,59 @@
 # React CRM Business Predictor
 
-AI-powered CRM application with business forecasting, risk management, and event scheduling capabilities. Supports local NVIDIA GPU inference and optional OpenAI integration.
+AI-powered CRM application with business forecasting, risk management, and event scheduling capabilities. Supports **fully local operation** with auto-downloading of dependencies, local NVIDIA GPU inference, and optional OpenAI integration.
+
+## ✨ New: Fully Local Setup with Auto-Download
+
+**🚀 Quick Start (Recommended):**
+```bash
+npm run setup && npm start
+```
+
+That's it! The application will automatically:
+- ✓ Download and install all Node.js dependencies
+- ✓ Download and install all Python packages
+- ✓ Auto-download and initialize AI models
+- ✓ Start both frontend and backend servers
+- ✓ Run completely offline (no internet required after setup)
+
+**📖 For detailed instructions, see [LOCAL_SETUP.md](LOCAL_SETUP.md)**
 
 ## Features
 
+- **🌐 Fully Local Operation**: Runs completely offline with local AI models
+- **📦 Auto-Download**: Automatically downloads all required modules
 - **Business Applicant Management**: Upload and manage applicant data
 - **AI-Powered Risk Assessment**: Predict business opportunities and assess risk
 - **Event Scheduling**: Manage meetings and events
 - **Wedding Reservations**: Specialized wedding booking system
-- **Local GPU Inference**: Utilize NVIDIA GPU for fast predictions
+- **Local GPU Inference**: Utilize NVIDIA GPU for fast predictions (optional)
 - **OpenAI Integration**: Optional cloud-based AI processing
 - **Real-time Analytics**: Business forecasting and trend analysis
 
 ## Prerequisites
 
-- Node.js 18+ and npm
-- Python 3.9+
-- NVIDIA GPU with CUDA support (optional, for local inference)
+**Minimum Requirements:**
+- Node.js 16+ and npm
+- Python 3.8+
+
+**Optional:**
+- NVIDIA GPU with CUDA support (for GPU acceleration)
 - CUDA Toolkit 11.8+ (if using GPU)
 
-## Quick Start
+## Quick Start Options
+
+### Option 1: Fully Local with Auto-Setup (Recommended)
+
+Perfect for running completely locally without internet dependency:
+
+```bash
+# One command setup and start
+npm run setup && npm start
+```
+
+See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed local setup instructions.
+
+### Option 2: Traditional Installation
 
 ### Automated Installation
 

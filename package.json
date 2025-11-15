@@ -1,6 +1,7 @@
 {
   "name": "react-crm-business-predictor",
   "version": "1.0.0",
+  "type": "module",
   "description": "CRM with AI-powered business forecasting and risk management",
   "private": true,
   "scripts": {
@@ -8,7 +9,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "backend": "cd backend && python app.py",
-    "install:all": "npm install && cd backend && pip install -r requirements.txt"
+    "install:all": "npm install && cd backend && pip install -r requirements.txt",
+    "start": "node start-local.js",
+    "setup": "node setup-local.js"
   },
   "dependencies": {
     "react": "^18.2.0",

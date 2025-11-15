@@ -11,6 +11,14 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Initialize models on startup
+try:
+    from init_models import initialize_models
+    initialize_models()
+except Exception as e:
+    print(f"⚠ Warning: Could not initialize models: {e}")
+    print("  The application will try to create models on first use.")
+
 # Import services
 from services.predictor import PredictorService
 from services.risk_analyzer import RiskAnalyzer

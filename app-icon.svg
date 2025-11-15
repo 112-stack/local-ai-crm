@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="256" height="256" rx="32" fill="#3B82F6"/>
+
+  <!-- CRM Icon - Document with chart -->
+  <g transform="translate(128, 128)">
+    <!-- Document background -->
+    <rect x="-60" y="-70" width="120" height="140" rx="8" fill="#FFFFFF"/>
+
+    <!-- Chart bars -->
+    <rect x="-45" y="20" width="20" height="35" rx="3" fill="#3B82F6"/>
+    <rect x="-15" y="0" width="20" height="55" rx="3" fill="#10B981"/>
+    <rect x="15" y="30" width="20" height="25" rx="3" fill="#F59E0B"/>
+
+    <!-- Title lines -->
+    <rect x="-45" y="-55" width="70" height="6" rx="3" fill="#3B82F6" opacity="0.6"/>
+    <rect x="-45" y="-40" width="50" height="4" rx="2" fill="#9CA3AF"/>
+
+    <!-- Sparkle/AI indicator -->
+    <circle cx="45" cy="-55" r="12" fill="#F59E0B"/>
+    <path d="M 45 -60 L 45 -50 M 40 -55 L 50 -55" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

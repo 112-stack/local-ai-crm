@@ -1,0 +1,11 @@
+name,email,phone,company,industry,revenue,employees,event_type,budget,date
+John Smith,john@techcorp.com,555-0101,TechCorp,Technology,5000000,120,corporate,75000,2024-06-15
+Sarah Johnson,sarah@weddings.com,555-0102,Happy Weddings,Events,500000,15,wedding,35000,2024-08-20
+Michael Chen,michael@startupxyz.com,555-0103,StartupXYZ,Technology,200000,8,meeting,5000,2024-05-10
+Emily Davis,emily@healthcare.com,555-0104,HealthPlus,Healthcare,8000000,200,conference,120000,2024-07-30
+Robert Wilson,robert@consulting.com,555-0105,Wilson Consulting,Consulting,1200000,25,corporate,45000,2024-06-01
+Jennifer Lee,jennifer@retail.com,555-0106,Fashion Retail,Retail,300000,12,meeting,8000,2024-05-25
+David Martinez,david@finance.com,555-0107,Finance Pro,Finance,15000000,350,conference,200000,2024-09-15
+Lisa Anderson,lisa@education.com,555-0108,EduTech,Education,2000000,60,meeting,15000,2024-06-10
+James Taylor,james@manufacturing.com,555-0109,Taylor Manufacturing,Manufacturing,10000000,450,corporate,95000,2024-08-05
+Maria Garcia,maria@events.com,555-0110,Elite Events,Events,750000,18,wedding,50000,2024-07-12

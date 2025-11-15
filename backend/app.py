@@ -1,0 +1,234 @@
+import os
+import sys
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from typing import Optional, List
+import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Import services
+from services.predictor import PredictorService
+from services.risk_analyzer import RiskAnalyzer
+from services.file_processor import FileProcessor
+from services.config_manager import ConfigManager
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="CRM Business Predictor API",
+    description="AI-powered business forecasting and risk management",
+    version="1.0.0"
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize services
+config_manager = ConfigManager()
+predictor_service = PredictorService(config_manager)
+risk_analyzer = RiskAnalyzer()
+file_processor = FileProcessor()
+
+# Pydantic models
+class ApplicantData(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    company: Optional[str] = None
+    industry: Optional[str] = None
+    revenue: Optional[str] = None
+    employees: Optional[str] = None
+    event_type: Optional[str] = None
+    budget: Optional[str] = None
+    date: Optional[str] = None
+
+class PredictionRequest(BaseModel):
+    applicant_data: ApplicantData
+
+class SettingsUpdate(BaseModel):
+    useLocalGPU: Optional[bool] = None
+    useOpenAI: Optional[bool] = None
+    openAIKey: Optional[str] = None
+    modelType: Optional[str] = None
+
+# Routes
+@app.get("/")
+async def root():
+    return {
+        "message": "CRM Business Predictor API",
+        "version": "1.0.0",
+        "status": "running"
+    }
+
+@app.get("/api/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "gpu_available": predictor_service.gpu_available,
+        "model_loaded": predictor_service.model is not None
+    }
+
+@app.get("/api/system-info")
+async def get_system_info():
+    import torch
+    import platform
+
+    info = {
+        "python_version": platform.python_version(),
+        "torch_version": torch.__version__,
+        "cuda_available": torch.cuda.is_available(),
+        "cuda_version": torch.version.cuda if torch.cuda.is_available() else None,
+        "gpu_available": torch.cuda.is_available(),
+        "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
+        "device": "cuda" if torch.cuda.is_available() else "cpu"
+    }
+    return info
+
+@app.post("/api/predict")
+async def predict(
+    request: PredictionRequest,
+    x_openai_key: Optional[str] = Header(None)
+):
+    try:
+        # Update OpenAI key if provided
+        if x_openai_key:
+            config_manager.update_setting('openai_key', x_openai_key)
+
+        # Convert applicant data to dict
+        applicant_dict = request.applicant_data.dict()
+
+        # Get prediction
+        result = await predictor_service.predict(applicant_dict)
+
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/risk-analysis")
+async def analyze_risk(request: PredictionRequest):
+    try:
+        applicant_dict = request.applicant_data.dict()
+        result = risk_analyzer.analyze(applicant_dict)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/upload-predict")
+async def upload_and_predict(
+    file: UploadFile = File(...),
+    x_openai_key: Optional[str] = Header(None)
+):
+    try:
+        # Update OpenAI key if provided
+        if x_openai_key:
+            config_manager.update_setting('openai_key', x_openai_key)
+
+        # Save uploaded file
+        file_path = await file_processor.save_upload(file)
+
+        # Process file and extract data
+        applicants = await file_processor.process_file(file_path)
+
+        # Get predictions for all applicants
+        predictions = []
+        for applicant in applicants:
+            try:
+                result = await predictor_service.predict(applicant)
+                predictions.append({
+                    "applicant_data": applicant,
+                    **result
+                })
+            except Exception as e:
+                print(f"Error predicting for applicant: {e}")
+                continue
+
+        # Clean up file
+        os.remove(file_path)
+
+        return {
+            "success": True,
+            "count": len(predictions),
+            "predictions": predictions
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/settings")
+async def get_settings():
+    return config_manager.get_all_settings()
+
+@app.post("/api/settings")
+async def update_settings(settings: SettingsUpdate):
+    try:
+        config_manager.update_settings(settings.dict(exclude_unset=True))
+
+        # Reload predictor if GPU settings changed
+        if settings.useLocalGPU is not None or settings.modelType is not None:
+            predictor_service.reload_model()
+
+        return {"success": True, "settings": config_manager.get_all_settings()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# In-memory storage for events and weddings (replace with database in production)
+events_db = []
+weddings_db = []
+
+@app.get("/api/events")
+async def get_events():
+    return events_db
+
+@app.post("/api/events")
+async def create_event(event: dict):
+    event['id'] = len(events_db) + 1
+    events_db.append(event)
+    return event
+
+@app.delete("/api/events/{event_id}")
+async def delete_event(event_id: int):
+    global events_db
+    events_db = [e for e in events_db if e.get('id') != event_id]
+    return {"success": True}
+
+@app.get("/api/weddings")
+async def get_weddings():
+    return weddings_db
+
+@app.post("/api/weddings")
+async def create_wedding(wedding: dict):
+    wedding['id'] = len(weddings_db) + 1
+    weddings_db.append(wedding)
+    return wedding
+
+@app.delete("/api/weddings/{wedding_id}")
+async def delete_wedding(wedding_id: int):
+    global weddings_db
+    weddings_db = [w for w in weddings_db if w.get('id') != wedding_id]
+    return {"success": True}
+
+if __name__ == "__main__":
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", 8000))
+
+    print(f"""
+    ╔════════════════════════════════════════╗
+    ║  CRM Business Predictor API Server    ║
+    ╚════════════════════════════════════════╝
+
+    🚀 Server starting...
+    📍 URL: http://{host}:{port}
+    🔧 GPU: {'Available' if predictor_service.gpu_available else 'Not Available (CPU Mode)'}
+
+    """)
+
+    uvicorn.run(app, host=host, port=port)

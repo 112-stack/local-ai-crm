@@ -50,12 +50,25 @@ class PredictorService:
                 model.load_state_dict(torch.load(model_path, map_location=self.device))
                 print(f"✓ Model loaded from {model_path}")
             except Exception as e:
-                print(f"⚠ Could not load model: {e}. Using new model.")
+                print(f"⚠ Could not load model: {e}. Creating new model...")
+                self._auto_create_model(model_path, model)
         else:
-            print("⚠ No saved model found. Using new model.")
+            print("⚠ No saved model found. Creating new model...")
+            self._auto_create_model(model_path, model)
 
         model.eval()
         return model
+
+    def _auto_create_model(self, model_path, model):
+        """Auto-create a model if it doesn't exist"""
+        try:
+            from services.model_downloader import ModelDownloader
+            downloader = ModelDownloader()
+            downloader.create_default_model('business_predictor.pth')
+            print(f"✓ Model auto-created at {model_path}")
+        except Exception as e:
+            print(f"⚠ Could not auto-create model: {e}")
+            print("  Using untrained model (predictions will be random until trained)")
 
     def reload_model(self):
         """Reload the model (useful when settings change)"""

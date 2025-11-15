@@ -1,0 +1,103 @@
+{
+  "description": "Auto Runner Configuration - Define scheduled tasks for automated operations",
+  "default_jobs": [
+    {
+      "job_id": "daily_health_check",
+      "task_name": "health_check",
+      "schedule_type": "cron",
+      "schedule_config": {
+        "hour": 0,
+        "minute": 0
+      },
+      "enabled": true,
+      "description": "Daily system health check at midnight UTC"
+    },
+    {
+      "job_id": "hourly_analytics_update",
+      "task_name": "analytics_update",
+      "schedule_type": "interval",
+      "schedule_config": {
+        "hours": 1
+      },
+      "enabled": false,
+      "description": "Update analytics every hour (disabled by default)"
+    },
+    {
+      "job_id": "weekly_cleanup",
+      "task_name": "cleanup_old_data",
+      "schedule_type": "cron",
+      "schedule_config": {
+        "day_of_week": 0,
+        "hour": 2,
+        "minute": 0
+      },
+      "enabled": true,
+      "description": "Clean up old data every Sunday at 2 AM UTC"
+    },
+    {
+      "job_id": "model_health_check_daily",
+      "task_name": "model_health_check",
+      "schedule_type": "cron",
+      "schedule_config": {
+        "hour": 6,
+        "minute": 0
+      },
+      "enabled": true,
+      "description": "Daily ML model health check at 6 AM UTC"
+    }
+  ],
+  "schedule_types": {
+    "interval": {
+      "description": "Run at regular intervals",
+      "parameters": {
+        "weeks": "Number of weeks to wait",
+        "days": "Number of days to wait",
+        "hours": "Number of hours to wait",
+        "minutes": "Number of minutes to wait",
+        "seconds": "Number of seconds to wait"
+      },
+      "example": {
+        "schedule_type": "interval",
+        "schedule_config": {
+          "hours": 2,
+          "minutes": 30
+        }
+      }
+    },
+    "cron": {
+      "description": "Run on a cron-like schedule",
+      "parameters": {
+        "year": "4-digit year",
+        "month": "Month (1-12)",
+        "day": "Day of month (1-31)",
+        "week": "ISO week (1-53)",
+        "day_of_week": "Day of week (0-6, Monday is 0)",
+        "hour": "Hour (0-23)",
+        "minute": "Minute (0-59)",
+        "second": "Second (0-59)"
+      },
+      "example": {
+        "schedule_type": "cron",
+        "schedule_config": {
+          "day_of_week": "0-4",
+          "hour": 9,
+          "minute": 0
+        }
+      }
+    }
+  },
+  "available_tasks": {
+    "health_check": "System health check - validates system status",
+    "cleanup_old_data": "Data cleanup - removes temporary and old data",
+    "analytics_update": "Analytics update - refreshes analytics and statistics",
+    "batch_predictions": "Batch predictions - processes queued prediction requests",
+    "model_health_check": "Model health check - validates ML model performance"
+  },
+  "usage_notes": [
+    "All times are in UTC timezone",
+    "Jobs with enabled=false will not run but are saved for reference",
+    "Use the API endpoints to add, remove, or modify jobs at runtime",
+    "Job history is kept for the last 100 executions",
+    "Only one instance of each job can run at a time (prevents overlapping executions)"
+  ]
+}

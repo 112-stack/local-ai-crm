@@ -56,7 +56,32 @@ npm run setup && npm start
 
 See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed local setup instructions.
 
-### Option 2: Traditional Installation
+### Option 2: Windows Auto-Launcher (One-Click Start) 🎯
+
+**Perfect for Windows users who want the easiest possible setup:**
+
+Simply double-click: **`auto-run.bat`**
+
+The auto-launcher will:
+- ✓ Automatically check and install all dependencies
+- ✓ Start both backend and frontend servers
+- ✓ Open in separate windows with clear status
+- ✓ Create configuration files if needed
+
+**Advanced Launcher Options:**
+- `auto-run.cmd` - Quick launcher for regular use
+- `launcher.vbs` - Auto-opens browser after starting
+- `launcher-silent.vbs` - Silent background startup
+- `CRM-Launcher.exe` - Custom executable with icon (build with `create-exe.ps1`)
+
+**📖 See [LAUNCHER_GUIDE.md](LAUNCHER_GUIDE.md) for complete launcher documentation including:**
+- Creating custom executable with icon
+- Adding to Windows startup
+- Desktop shortcuts
+- Silent background operation
+- And more!
+
+### Option 3: Traditional Installation
 
 ### Automated Installation
 

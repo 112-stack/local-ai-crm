@@ -71,17 +71,55 @@ source venv/bin/activate
 
 # Install backend dependencies
 echo -e "${YELLOW}Installing backend dependencies...${NC}"
-pip install --upgrade pip
-pip install -r requirements.txt
+pip install --upgrade pip setuptools wheel
 
-# Install PyTorch with CUDA support if GPU is available
+# Install PyTorch with CUDA 12.1 support if GPU is available
 if [ "$GPU_AVAILABLE" = true ]; then
-    echo -e "${YELLOW}Installing PyTorch with CUDA support...${NC}"
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+    echo -e "${YELLOW}Installing PyTorch with CUDA 12.1 support...${NC}"
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+    # Setup CUDA 12 environment variables automatically
+    echo -e "${YELLOW}Setting up CUDA 12 environment variables...${NC}"
+
+    # Detect CUDA installation path
+    if [ -d "/usr/local/cuda-12.1" ]; then
+        CUDA_PATH="/usr/local/cuda-12.1"
+    elif [ -d "/usr/local/cuda-12" ]; then
+        CUDA_PATH="/usr/local/cuda-12"
+    elif [ -d "/usr/local/cuda" ]; then
+        CUDA_PATH="/usr/local/cuda"
+    fi
+
+    if [ ! -z "$CUDA_PATH" ]; then
+        # Add to current session
+        export CUDA_HOME="$CUDA_PATH"
+        export PATH="$CUDA_PATH/bin:$PATH"
+        export LD_LIBRARY_PATH="$CUDA_PATH/lib64:$LD_LIBRARY_PATH"
+
+        # Make permanent by adding to .bashrc if not already there
+        if ! grep -q "CUDA_HOME" ~/.bashrc; then
+            echo "" >> ~/.bashrc
+            echo "# CUDA 12 Environment Variables" >> ~/.bashrc
+            echo "export CUDA_HOME=\"$CUDA_PATH\"" >> ~/.bashrc
+            echo "export PATH=\"\$CUDA_HOME/bin:\$PATH\"" >> ~/.bashrc
+            echo "export LD_LIBRARY_PATH=\"\$CUDA_HOME/lib64:\$LD_LIBRARY_PATH\"" >> ~/.bashrc
+            echo -e "${GREEN}✓ CUDA 12 environment variables added to ~/.bashrc${NC}"
+        fi
+        echo -e "${GREEN}✓ CUDA 12 environment configured at $CUDA_PATH${NC}"
+    else
+        echo -e "${YELLOW}⚠ CUDA installation not found in standard paths${NC}"
+    fi
 else
     echo -e "${YELLOW}Installing PyTorch (CPU version)...${NC}"
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 fi
+
+# Install other dependencies with pre-built wheels (avoid compilation)
+echo -e "${YELLOW}Installing remaining dependencies...${NC}"
+pip install --only-binary=:all: numpy pandas scikit-learn 2>/dev/null || pip install numpy pandas scikit-learn
+
+# Install rest of requirements
+pip install -r requirements.txt
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Failed to install backend dependencies${NC}"

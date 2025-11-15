@@ -62,17 +62,35 @@ call venv\Scripts\activate.bat
 
 REM Install backend dependencies
 echo Installing backend dependencies...
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install --upgrade pip setuptools wheel
 
-REM Install PyTorch
+REM Install PyTorch with CUDA 12.1 support first (if GPU available)
 if "%GPU_AVAILABLE%"=="true" (
-    echo Installing PyTorch with CUDA support...
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+    echo Installing PyTorch with CUDA 12.1 support...
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+    REM Add CUDA 12 to environment variables automatically
+    echo Setting up CUDA 12 environment variables...
+    setx CUDA_PATH "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1" >nul 2>&1
+    setx CUDA_HOME "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1" >nul 2>&1
+    set "PATH=%PATH%;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\bin"
+    set "PATH=%PATH%;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1\libnvvp"
+    echo CUDA 12.1 environment variables set!
 ) else (
     echo Installing PyTorch CPU version...
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 )
+
+REM Install other dependencies with pre-built wheels (avoid compilation)
+echo Installing remaining dependencies...
+pip install --only-binary=:all: numpy pandas scikit-learn 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo Retrying with standard installation...
+    pip install numpy pandas scikit-learn
+)
+
+REM Install rest of requirements
+pip install -r requirements.txt
 
 REM Create .env file
 if not exist ".env" (

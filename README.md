@@ -34,12 +34,14 @@ That's it! The application will automatically:
 ## Prerequisites
 
 **Minimum Requirements:**
-- Node.js 16+ and npm
-- Python 3.8+
+- Node.js 18+ and npm
+- Python 3.9+
 
-**Optional:**
-- NVIDIA GPU with CUDA support (for GPU acceleration)
-- CUDA Toolkit 11.8+ (if using GPU)
+**Optional (For GPU Acceleration):**
+- NVIDIA GPU with CUDA 12.x support
+- CUDA Toolkit 12.1+ (automatically configured during installation)
+
+**Note:** The installer now uses CUDA 12.1 for optimal performance and compatibility with the latest PyTorch versions. Environment variables are set up automatically!
 
 ## Quick Start Options
 
@@ -124,11 +126,34 @@ MODEL_TYPE=local  # local or openai
 
 ## GPU Support
 
-The application automatically detects NVIDIA GPU availability. To enable:
+The application automatically detects NVIDIA GPU availability and sets up CUDA 12.1:
 
-1. Install CUDA Toolkit
-2. Set `USE_LOCAL_GPU=true` in `.env`
-3. Ensure PyTorch is installed with CUDA support
+**Automatic Setup:**
+1. Install CUDA Toolkit 12.1 or higher from [NVIDIA's website](https://developer.nvidia.com/cuda-downloads)
+2. Run the installation script (`install.bat` or `install.sh`)
+3. The installer will:
+   - Detect your GPU automatically
+   - Install PyTorch with CUDA 12.1 support
+   - Configure CUDA environment variables automatically
+   - Set `USE_LOCAL_GPU=true` in `.env`
+
+**Manual Configuration (if needed):**
+```bash
+# Windows
+setx CUDA_PATH "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1"
+setx CUDA_HOME "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.1"
+
+# Linux
+export CUDA_HOME=/usr/local/cuda-12.1
+export PATH=$CUDA_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+```
+
+**Verify GPU Setup:**
+```bash
+nvidia-smi  # Check GPU is detected
+python -c "import torch; print(f'CUDA Available: {torch.cuda.is_available()}')"
+```
 
 ## Hugging Face Models
 

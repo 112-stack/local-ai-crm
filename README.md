@@ -22,6 +22,7 @@ That's it! The application will automatically:
 
 - **🌐 Fully Local Operation**: Runs completely offline with local AI models
 - **📦 Auto-Download**: Automatically downloads all required modules
+- **🤗 Hugging Face Models**: Pre-trained models for NLP tasks (sentiment, NER, etc.)
 - **Business Applicant Management**: Upload and manage applicant data
 - **AI-Powered Risk Assessment**: Predict business opportunities and assess risk
 - **Event Scheduling**: Manage meetings and events
@@ -128,6 +129,55 @@ The application automatically detects NVIDIA GPU availability. To enable:
 1. Install CUDA Toolkit
 2. Set `USE_LOCAL_GPU=true` in `.env`
 3. Ensure PyTorch is installed with CUDA support
+
+## Hugging Face Models
+
+The application supports pre-trained models from Hugging Face for advanced NLP tasks:
+
+### Quick Setup
+
+Download recommended models for business applications:
+
+```bash
+cd backend
+python -m services.model_downloader download-recommended
+```
+
+This downloads models for:
+- Sentiment analysis
+- Emotion detection
+- Named Entity Recognition (NER)
+- Financial sentiment analysis
+
+### Available Models
+
+The application includes 8 pre-trained models:
+- **sentiment**: Positive/negative sentiment analysis
+- **emotion**: Detect joy, sadness, anger, fear, etc.
+- **ner**: Extract person, organization, location entities
+- **qa**: Question answering
+- **financial-sentiment**: Specialized for financial text
+- **text-generation**: Text completion (GPT-2)
+- **summarization**: Text summarization
+- **zero-shot**: Zero-shot classification
+
+**📖 For detailed documentation, see [HUGGINGFACE_MODELS.md](HUGGINGFACE_MODELS.md)**
+
+### Usage Example
+
+```python
+from services.huggingface_service import HuggingFaceService
+
+hf = HuggingFaceService()
+
+# Analyze sentiment
+result = hf.analyze_sentiment("This is a great opportunity!")
+# {'sentiment': 'POSITIVE', 'confidence': 0.9998}
+
+# Extract entities
+entities = hf.extract_entities("Apple Inc. is in Cupertino, CA")
+# [{'text': 'Apple Inc.', 'type': 'ORG'}, ...]
+```
 
 ## API Endpoints
 

@@ -56,6 +56,50 @@ async function checkSetup() {
   return true;
 }
 
+async function checkBackendHealth(maxAttempts = 15, delayMs = 1000) {
+  const http = await import('http');
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await new Promise((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: 'localhost',
+            port: 8000,
+            path: '/api/health',
+            method: 'GET',
+            timeout: 2000
+          },
+          (res) => {
+            if (res.statusCode === 200) {
+              resolve();
+            } else {
+              reject(new Error(`Health check returned status ${res.statusCode}`));
+            }
+          }
+        );
+
+        req.on('error', reject);
+        req.on('timeout', () => {
+          req.destroy();
+          reject(new Error('Health check timeout'));
+        });
+
+        req.end();
+      });
+
+      return true;
+    } catch (error) {
+      if (attempt < maxAttempts) {
+        process.stdout.write('.');
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+
+  return false;
+}
+
 function startBackend() {
   return new Promise((resolve, reject) => {
     log('\n🚀 Starting backend server...', colors.magenta);
@@ -63,8 +107,29 @@ function startBackend() {
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
     const backend = spawn(pythonCmd, ['app.py'], {
       cwd: join(__dirname, 'backend'),
-      stdio: 'inherit',
+      stdio: 'pipe',
       shell: true
+    });
+
+    let backendOutput = '';
+
+    // Capture output for debugging
+    backend.stdout.on('data', (data) => {
+      const output = data.toString();
+      backendOutput += output;
+      // Show important messages
+      if (output.includes('✓') || output.includes('Server starting') || output.includes('Uvicorn running')) {
+        process.stdout.write(colors.green + output + colors.reset);
+      }
+    });
+
+    backend.stderr.on('data', (data) => {
+      const output = data.toString();
+      backendOutput += output;
+      // Only show critical errors
+      if (output.includes('Error') || output.includes('Failed')) {
+        process.stderr.write(colors.yellow + output + colors.reset);
+      }
     });
 
     backend.on('error', (error) => {
@@ -75,14 +140,13 @@ function startBackend() {
     backend.on('exit', (code) => {
       if (code !== 0 && code !== null) {
         log(`\n⚠ Backend exited with code ${code}`, colors.yellow);
+        log('Backend output:', colors.yellow);
+        console.log(backendOutput);
       }
     });
 
-    // Give backend time to start
-    setTimeout(() => {
-      log('  ✓ Backend server starting...', colors.green);
-      resolve(backend);
-    }, 2000);
+    // Store reference for shutdown
+    resolve(backend);
   });
 }
 
@@ -179,8 +243,23 @@ async function main() {
     // Start backend first
     backendProcess = await startBackend();
 
-    // Wait a bit for backend to fully start
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Wait for backend to be healthy
+    log('\n⏳ Waiting for backend to be ready', colors.cyan);
+    process.stdout.write('   Checking health');
+
+    const isHealthy = await checkBackendHealth();
+
+    if (!isHealthy) {
+      log('\n\n✗ Backend health check failed after 15 seconds', colors.red);
+      log('  Please check backend logs for errors', colors.yellow);
+      log('  You may need to:', colors.yellow);
+      log('    1. Install Python dependencies: pip install -r backend/requirements.txt', colors.yellow);
+      log('    2. Check if port 8000 is already in use', colors.yellow);
+      log('    3. Review backend/app.py for errors\n', colors.yellow);
+      throw new Error('Backend failed to start');
+    }
+
+    log('\n  ✓ Backend is healthy and ready!', colors.green);
 
     // Start frontend
     frontendProcess = await startFrontend();

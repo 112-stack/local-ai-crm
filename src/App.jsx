@@ -7,11 +7,13 @@ import Events from './pages/Events'
 import Weddings from './pages/Weddings'
 import Predictions from './pages/Predictions'
 import Settings from './pages/Settings'
+import BackendStatusMonitor from './components/BackendStatusMonitor'
 
 function App() {
   return (
     <Router>
       <Toaster position="top-right" />
+      <BackendStatusMonitor />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />

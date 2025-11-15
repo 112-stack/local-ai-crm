@@ -2,12 +2,43 @@ import axios from 'axios'
 
 const API_BASE_URL = '/api'
 
+// Retry configuration
+const MAX_RETRIES = 3
+const INITIAL_RETRY_DELAY = 1000 // 1 second
+const MAX_RETRY_DELAY = 10000 // 10 seconds
+
+// Circuit breaker state
+let circuitBreakerState = {
+  failures: 0,
+  lastFailureTime: null,
+  isOpen: false,
+  threshold: 5,
+  resetTimeout: 30000 // 30 seconds
+}
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 second timeout
 })
+
+// Utility: Check if circuit breaker should reset
+const shouldResetCircuitBreaker = () => {
+  if (!circuitBreakerState.isOpen) return false
+  const timeSinceLastFailure = Date.now() - circuitBreakerState.lastFailureTime
+  return timeSinceLastFailure > circuitBreakerState.resetTimeout
+}
+
+// Utility: Exponential backoff delay
+const getRetryDelay = (retryCount) => {
+  const delay = Math.min(INITIAL_RETRY_DELAY * Math.pow(2, retryCount), MAX_RETRY_DELAY)
+  return delay + Math.random() * 1000 // Add jitter
+}
+
+// Utility: Sleep function
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 // Interceptor for OpenAI key
 api.interceptors.request.use((config) => {
@@ -17,6 +48,81 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+// Response interceptor for retry logic
+api.interceptors.response.use(
+  (response) => {
+    // Reset circuit breaker on success
+    circuitBreakerState.failures = 0
+    circuitBreakerState.isOpen = false
+    return response
+  },
+  async (error) => {
+    const config = error.config
+
+    // Check if circuit breaker should reset
+    if (shouldResetCircuitBreaker()) {
+      circuitBreakerState.failures = 0
+      circuitBreakerState.isOpen = false
+    }
+
+    // Don't retry if circuit breaker is open
+    if (circuitBreakerState.isOpen) {
+      console.warn('⚠️ Circuit breaker is open. Backend may be down.')
+      error.circuitBreakerOpen = true
+      return Promise.reject(error)
+    }
+
+    // Initialize retry count
+    config._retryCount = config._retryCount || 0
+
+    // Check if we should retry
+    const shouldRetry =
+      config._retryCount < MAX_RETRIES &&
+      (!error.response || error.response.status >= 500 || error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK')
+
+    if (!shouldRetry) {
+      // Update circuit breaker
+      circuitBreakerState.failures++
+      circuitBreakerState.lastFailureTime = Date.now()
+
+      if (circuitBreakerState.failures >= circuitBreakerState.threshold) {
+        circuitBreakerState.isOpen = true
+        console.error('🔴 Circuit breaker opened. Backend is unreachable.')
+      }
+
+      return Promise.reject(error)
+    }
+
+    // Increment retry count
+    config._retryCount++
+
+    // Calculate delay
+    const delay = getRetryDelay(config._retryCount - 1)
+
+    console.log(`🔄 Retrying request (${config._retryCount}/${MAX_RETRIES}) after ${Math.round(delay)}ms...`)
+
+    // Wait before retrying
+    await sleep(delay)
+
+    // Retry the request
+    return api(config)
+  }
+)
+
+// Export circuit breaker status checker
+export const getCircuitBreakerStatus = () => ({
+  isOpen: circuitBreakerState.isOpen,
+  failures: circuitBreakerState.failures,
+  lastFailureTime: circuitBreakerState.lastFailureTime
+})
+
+// Export function to manually reset circuit breaker
+export const resetCircuitBreaker = () => {
+  circuitBreakerState.failures = 0
+  circuitBreakerState.isOpen = false
+  circuitBreakerState.lastFailureTime = null
+}
 
 export const apiService = {
   // Health check

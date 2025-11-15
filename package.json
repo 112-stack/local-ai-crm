@@ -5,13 +5,15 @@
   "description": "CRM with AI-powered business forecasting and risk management",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "node dev-check.js",
+    "dev:frontend-only": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "backend": "cd backend && python app.py",
     "install:all": "npm install && cd backend && pip install -r requirements.txt",
     "start": "node start-local.js",
-    "setup": "node setup-local.js"
+    "setup": "node setup-local.js",
+    "health": "node health-check.js"
   },
   "dependencies": {
     "react": "^18.2.0",

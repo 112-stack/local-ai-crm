@@ -18,6 +18,28 @@ That's it! The application will automatically:
 
 **📖 For detailed instructions, see [LOCAL_SETUP.md](LOCAL_SETUP.md)**
 
+## 🔧 Troubleshooting
+
+**Having connection issues or seeing "ECONNREFUSED" errors?**
+
+The application includes comprehensive error handling and monitoring:
+
+- ✅ **Automatic retry** with exponential backoff for failed requests
+- ✅ **Circuit breaker** pattern to prevent cascade failures
+- ✅ **Real-time connection monitor** in the UI
+- ✅ **Health check** command to diagnose issues
+
+**Quick fixes:**
+```bash
+# Run comprehensive health check
+npm run health
+
+# Always use npm start (not npm run dev alone)
+npm start
+```
+
+**📖 See [STARTUP_GUIDE.md](STARTUP_GUIDE.md) for complete troubleshooting guide**
+
 ## Features
 
 - **🌐 Fully Local Operation**: Runs completely offline with local AI models

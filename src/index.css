@@ -4,40 +4,214 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gradient-to-br from-dark-400 via-dark-300 to-dark-200 text-white min-h-screen;
+    background-attachment: fixed;
+  }
+
+  * {
+    @apply transition-all duration-300 ease-in-out;
   }
 }
 
 @layer components {
+  /* Futuristic Buttons */
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 ease-out;
+    @apply transform hover:scale-105 active:scale-95;
+    @apply shadow-lg hover:shadow-2xl;
   }
 
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
+    @apply bg-gradient-to-r from-neon-blue to-neon-cyan text-white;
+    @apply hover:from-neon-cyan hover:to-neon-blue;
+    @apply shadow-neon hover:shadow-glow;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400;
+    @apply bg-white/10 backdrop-blur-md text-white border border-white/20;
+    @apply hover:bg-white/20 hover:border-white/30;
   }
 
   .btn-success {
-    @apply bg-green-600 text-white hover:bg-green-700 active:bg-green-800;
+    @apply bg-gradient-to-r from-neon-green to-emerald-400 text-white;
+    @apply hover:from-emerald-400 hover:to-neon-green;
+    @apply shadow-[0_0_20px_rgba(16,185,129,0.5)];
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 active:bg-red-800;
+    @apply bg-gradient-to-r from-red-500 to-neon-pink text-white;
+    @apply hover:from-neon-pink hover:to-red-500;
+    @apply shadow-neon-pink;
   }
 
+  /* Glass morphism Cards */
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10;
+    @apply shadow-glass hover:shadow-3d;
+    @apply transform hover:-translate-y-1;
+    @apply animate-scale-in;
   }
 
+  .card-glow {
+    @apply card;
+    @apply hover:shadow-glow hover:border-neon-blue/30;
+  }
+
+  .card-neon {
+    @apply card;
+    @apply border-neon-blue/20 shadow-neon;
+  }
+
+  /* Futuristic Inputs */
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none;
+    @apply w-full px-4 py-3 rounded-xl outline-none;
+    @apply bg-white/5 backdrop-blur-md border border-white/20;
+    @apply text-white placeholder-white/40;
+    @apply focus:bg-white/10 focus:border-neon-blue focus:shadow-neon;
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-2;
+    @apply block text-sm font-semibold text-white/80 mb-2 uppercase tracking-wider;
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-gradient-cyber bg-clip-text text-transparent;
+    @apply font-bold;
+  }
+
+  .text-gradient-2 {
+    @apply bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink;
+    @apply bg-clip-text text-transparent font-bold;
+  }
+
+  /* Stat Cards */
+  .stat-card {
+    @apply card-glow;
+    @apply relative overflow-hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-1;
+    @apply bg-gradient-cyber;
+  }
+
+  /* Navigation Items */
+  .nav-item {
+    @apply flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300;
+    @apply text-white/60 hover:text-white;
+    @apply hover:bg-white/10 hover:shadow-lg;
+  }
+
+  .nav-item-active {
+    @apply nav-item bg-gradient-to-r from-neon-blue/20 to-neon-purple/20;
+    @apply text-white border border-neon-blue/30 shadow-neon;
+  }
+
+  /* Glassmorphism Container */
+  .glass-container {
+    @apply bg-white/5 backdrop-blur-2xl rounded-3xl;
+    @apply border border-white/10 shadow-glass;
+  }
+
+  /* Neon Borders */
+  .border-neon {
+    @apply border-2 border-neon-blue shadow-neon;
+  }
+
+  .border-neon-glow {
+    @apply border-2 border-neon-blue animate-glow shadow-glow;
+  }
+
+  /* Progress Bars */
+  .progress-bar {
+    @apply h-2 rounded-full overflow-hidden bg-white/10;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full bg-gradient-cyber animate-shimmer;
+    background-size: 200% 100%;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+    @apply backdrop-blur-md border;
+  }
+
+  .badge-success {
+    @apply badge bg-neon-green/20 text-neon-green border-neon-green/30;
+  }
+
+  .badge-warning {
+    @apply badge bg-neon-yellow/20 text-neon-yellow border-neon-yellow/30;
+  }
+
+  .badge-danger {
+    @apply badge bg-neon-pink/20 text-neon-pink border-neon-pink/30;
+  }
+
+  .badge-info {
+    @apply badge bg-neon-blue/20 text-neon-blue border-neon-blue/30;
+  }
+
+  /* Floating Animation */
+  .float {
+    @apply animate-float;
+  }
+
+  /* Cyber Grid Background */
+  .cyber-grid {
+    background-image:
+      linear-gradient(rgba(0, 217, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 217, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* Scan Line Effect */
+  .scan-line {
+    @apply relative overflow-hidden;
+  }
+
+  .scan-line::after {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-full;
+    background: linear-gradient(
+      transparent 40%,
+      rgba(0, 217, 255, 0.1) 50%,
+      transparent 60%
+    );
+    animation: scan 3s linear infinite;
+  }
+
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom Scrollbar */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-white/5 rounded-full;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply bg-neon-blue/50 rounded-full;
+    @apply hover:bg-neon-blue/70;
   }
 }

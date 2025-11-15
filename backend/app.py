@@ -24,6 +24,7 @@ from services.predictor import PredictorService
 from services.risk_analyzer import RiskAnalyzer
 from services.file_processor import FileProcessor
 from services.config_manager import ConfigManager
+from services.auto_runner import get_auto_runner
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -46,6 +47,26 @@ config_manager = ConfigManager()
 predictor_service = PredictorService(config_manager)
 risk_analyzer = RiskAnalyzer()
 file_processor = FileProcessor()
+auto_runner = get_auto_runner()
+
+# Startup and shutdown events
+@app.on_event("startup")
+async def startup_event():
+    """Start auto runner on application startup"""
+    try:
+        await auto_runner.start()
+        print("✅ Auto Runner started successfully")
+    except Exception as e:
+        print(f"⚠ Warning: Could not start auto runner: {e}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Stop auto runner on application shutdown"""
+    try:
+        await auto_runner.stop()
+        print("✅ Auto Runner stopped successfully")
+    except Exception as e:
+        print(f"⚠ Warning: Error stopping auto runner: {e}")
 
 # Pydantic models
 class ApplicantData(BaseModel):
@@ -68,6 +89,13 @@ class SettingsUpdate(BaseModel):
     useOpenAI: Optional[bool] = None
     openAIKey: Optional[str] = None
     modelType: Optional[str] = None
+
+class JobSchedule(BaseModel):
+    job_id: str
+    task_name: str
+    schedule_type: str  # 'interval' or 'cron'
+    schedule_config: dict
+    enabled: bool = True
 
 # Routes
 @app.get("/")
@@ -185,6 +213,97 @@ async def update_settings(settings: SettingsUpdate):
             predictor_service.reload_model()
 
         return {"success": True, "settings": config_manager.get_all_settings()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Auto Runner Routes
+@app.get("/api/auto-runner/status")
+async def get_auto_runner_status():
+    """Get auto runner status"""
+    try:
+        return auto_runner.get_status()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-runner/tasks")
+async def get_available_tasks():
+    """Get list of available tasks"""
+    try:
+        return {"tasks": auto_runner.get_available_tasks()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-runner/jobs")
+async def get_all_jobs():
+    """Get all scheduled jobs"""
+    try:
+        return {"jobs": auto_runner.get_all_jobs()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-runner/jobs/{job_id}")
+async def get_job(job_id: str):
+    """Get specific job information"""
+    try:
+        job = auto_runner.get_job(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+        return job
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-runner/jobs")
+async def create_job(job: JobSchedule):
+    """Create a new scheduled job"""
+    try:
+        result = auto_runner.add_job(
+            job_id=job.job_id,
+            task_name=job.task_name,
+            schedule_type=job.schedule_type,
+            schedule_config=job.schedule_config,
+            enabled=job.enabled
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/auto-runner/jobs/{job_id}")
+async def delete_job(job_id: str):
+    """Delete a scheduled job"""
+    try:
+        result = auto_runner.remove_job(job_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/auto-runner/history")
+async def get_job_history(limit: int = 20):
+    """Get job execution history"""
+    try:
+        history = auto_runner.get_job_history(limit)
+        return {"history": history, "count": len(history)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-runner/start")
+async def start_auto_runner():
+    """Start the auto runner"""
+    try:
+        await auto_runner.start()
+        return {"status": "started", "message": "Auto runner started successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auto-runner/stop")
+async def stop_auto_runner():
+    """Stop the auto runner"""
+    try:
+        await auto_runner.stop()
+        return {"status": "stopped", "message": "Auto runner stopped successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

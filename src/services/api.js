@@ -111,6 +111,52 @@ export const apiService = {
     const response = await api.get('/system-info')
     return response.data
   },
+
+  // Auto Runner
+  getAutoRunnerStatus: async () => {
+    const response = await api.get('/auto-runner/status')
+    return response.data
+  },
+
+  getAvailableTasks: async () => {
+    const response = await api.get('/auto-runner/tasks')
+    return response.data
+  },
+
+  getAutoRunnerJobs: async () => {
+    const response = await api.get('/auto-runner/jobs')
+    return response.data
+  },
+
+  getAutoRunnerJob: async (jobId) => {
+    const response = await api.get(`/auto-runner/jobs/${jobId}`)
+    return response.data
+  },
+
+  createAutoRunnerJob: async (job) => {
+    const response = await api.post('/auto-runner/jobs', job)
+    return response.data
+  },
+
+  deleteAutoRunnerJob: async (jobId) => {
+    const response = await api.delete(`/auto-runner/jobs/${jobId}`)
+    return response.data
+  },
+
+  getAutoRunnerHistory: async (limit = 20) => {
+    const response = await api.get(`/auto-runner/history?limit=${limit}`)
+    return response.data
+  },
+
+  startAutoRunner: async () => {
+    const response = await api.post('/auto-runner/start')
+    return response.data
+  },
+
+  stopAutoRunner: async () => {
+    const response = await api.post('/auto-runner/stop')
+    return response.data
+  },
 }
 
 export default api

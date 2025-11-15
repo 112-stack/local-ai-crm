@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore'
 import { Settings as SettingsIcon, Save, Cpu, Cloud, Key, Info, Zap } from 'lucide-react'
 import { apiService } from '../services/api'
 import toast from 'react-hot-toast'
+import AutoRunner from '../components/AutoRunner'
 
 export default function Settings() {
   const { settings, updateSettings } = useStore()
@@ -266,6 +267,13 @@ export default function Settings() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Auto Runner Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Auto Runner</h2>
+        <p className="text-gray-600 mb-6">Manage scheduled tasks and automated operations</p>
+        <AutoRunner />
       </div>
     </div>
   )

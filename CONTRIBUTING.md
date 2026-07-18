@@ -1,81 +1,29 @@
-# Contributing to React CRM Business Predictor
+# Contributing to Local AI CRM
 
-Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
+Thank you for contributing to the local-first CRM and business forecasting platform.
 
-## Development Setup
+## Before you start
 
-1. Fork the repository
-2. Clone your fork
-3. Run the installation script: `./install.sh` (Linux/Mac) or `install.bat` (Windows)
-4. Create a new branch: `git checkout -b feature/your-feature-name`
+- Read the [Code of Conduct](CODE_OF_CONDUCT.md).
+- Search existing issues and agree on scope for major model or architecture changes.
+- Never commit API keys, `.env` files, customer records, model weights, or generated datasets.
+- Use synthetic or properly licensed data in examples and tests.
 
-## Project Structure
+## Local setup
 
-```
-.
-├── src/                    # React frontend
-│   ├── components/        # React components
-│   ├── pages/            # Page components
-│   ├── services/         # API services
-│   └── store/            # State management
-├── backend/              # Python backend
-│   ├── services/        # Business logic
-│   ├── models/          # ML models
-│   └── app.py           # FastAPI application
-└── public/              # Static assets
-```
+Requires Node.js 18+, Python 3.9+, and optionally an NVIDIA GPU.
 
-## Coding Standards
-
-### Frontend (React/JavaScript)
-- Use functional components with hooks
-- Follow ESLint configuration
-- Use meaningful variable names
-- Add comments for complex logic
-- Keep components small and focused
-
-### Backend (Python)
-- Follow PEP 8 style guide
-- Use type hints where applicable
-- Add docstrings to functions and classes
-- Keep functions focused on single responsibility
-- Handle errors gracefully
-
-## Making Changes
-
-1. Make your changes in your feature branch
-2. Test your changes thoroughly
-3. Update documentation if needed
-4. Commit with clear, descriptive messages
-5. Push to your fork
-6. Create a pull request
-
-## Testing
-
-### Frontend
 ```bash
-npm run test
+git clone https://github.com/112-stack/local-ai-crm.git
+cd local-ai-crm
+npm install
+npm run build
 ```
 
-### Backend
-```bash
-cd backend
-pytest
-```
+Backend dependencies are documented in `backend/requirements.txt`. UI-only changes should not require downloading large models.
 
-## Pull Request Process
+## Pull requests
 
-1. Update the README.md with details of changes if needed
-2. Update the version numbers following [SemVer](http://semver.org/)
-3. The PR will be merged once you have the sign-off of a maintainer
+Keep model changes reproducible, document CPU/GPU expectations, and include tests or a deterministic validation procedure. Explain privacy and performance implications for changes that process applicant or CRM data.
 
-## Code of Conduct
-
-- Be respectful and inclusive
-- Provide constructive feedback
-- Focus on the code, not the person
-- Help others learn and grow
-
-## Questions?
-
-Feel free to open an issue for any questions or concerns.
+Useful first contributions include lightweight test fixtures, CPU-only setup improvements, accessibility fixes, and clearer model-provider abstractions.

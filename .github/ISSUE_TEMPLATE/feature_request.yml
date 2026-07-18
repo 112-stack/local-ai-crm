@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose a focused improvement to Local AI CRM
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What user or contributor need should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior and scope.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Would you like to work on this?
+      options:
+        - "Yes"
+        - "Maybe, with guidance"
+        - "No"

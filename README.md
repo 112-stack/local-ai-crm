@@ -1,5 +1,8 @@
 # React CRM Business Predictor
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 AI-powered CRM application with business forecasting, risk management, and event scheduling capabilities. Supports **fully local operation** with auto-downloading of dependencies, local NVIDIA GPU inference, and optional OpenAI integration.
 
 ## ✨ New: Fully Local Setup with Auto-Download
@@ -258,3 +261,12 @@ entities = hf.extract_entities("Apple Inc. is in Cupertino, CA")
 ## License
 
 MIT
+
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and use the issue templates. Good first contributions include lightweight test fixtures, CPU-only setup improvements, accessibility fixes, and model-provider abstractions.
+
+## Security
+
+Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
